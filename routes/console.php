@@ -14,7 +14,7 @@ Schedule::command('enrollments')
    ->everyMinute()
   // ->everyThreeHours()
    // ->hourly()
-    ->onOneServer()
+    //->onOneServer()
     ->runInBackground();
 
 Schedule::command('installment')
@@ -22,7 +22,7 @@ Schedule::command('installment')
    ->everyMinute()
   // ->everyThreeHours()
    // ->hourly()
-    ->onOneServer()
+    //->onOneServer()
     ->runInBackground();
 
 
@@ -31,7 +31,7 @@ Schedule::command('financial')
    ->everyMinute()
   // ->everyThreeHours()
    // ->hourly()
-    ->onOneServer()
+    //->onOneServer()
     ->runInBackground();
 
 Schedule::command('student')
@@ -39,5 +39,5 @@ Schedule::command('student')
    ->everyMinute()
   // ->everyThreeHours()
    // ->hourly()
-    ->onOneServer()
+    //->onOneServer()
     ->runInBackground();
