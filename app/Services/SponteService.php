@@ -13,8 +13,8 @@ class SponteService
 
     public function __construct()
     {
-        $this->token = env('SPONTE_TOKEN');
-        $this->codigoCliente = env('SPONTE_CODIGO_CLIENTE');
+        $this->token = config('services.sponte.token');
+        $this->codigoCliente = config('services.sponte.codigo_cliente');
     }
 
 

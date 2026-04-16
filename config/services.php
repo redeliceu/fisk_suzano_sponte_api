@@ -14,6 +14,10 @@ return [
     |
     */
 
+    'sponte' => [
+        'codigo_cliente' => env('SPONTE_CODIGO_CLIENTE'),
+        'token' => env('SPONTE_TOKEN'),
+    ],
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],
