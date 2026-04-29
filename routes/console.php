@@ -11,33 +11,35 @@ Artisan::command('inspire', function () {
 
 Schedule::command('enrollments')
     ->timezone('America/Sao_Paulo')
-    //->everyMinute()
-    ->everyThreeHours()
+    // ->everyMinute()
+    // ->everyThreeHours()
+    ->everyThirtyMinutes()
     // ->hourly()
-    //->onOneServer()
+    ->onOneServer()
     ->runInBackground();
 
 Schedule::command('installment')
     ->timezone('America/Sao_Paulo')
-    //->everyMinute()
-    ->everyThreeHours()
-    // ->hourly()
-    //->onOneServer()
+    // ->everyMinute()
+    ->everyTwoHours()
+    // ->everyThreeHours()
+    //  ->hourly()
+    ->onOneServer()
     ->runInBackground();
 
 
 Schedule::command('financial')
     ->timezone('America/Sao_Paulo')
-    //->everyMinute()
-    ->everyThreeHours()
-    // ->hourly()
-    //->onOneServer()
+    // ->everyMinute()
+    //->everyThreeHours()
+    ->hourly()
+    ->onOneServer()
     ->runInBackground();
 
 Schedule::command('student')
     ->timezone('America/Sao_Paulo')
-    //->everyMinute()
+    // ->everyMinute()
     ->everyThreeHours()
     // ->hourly()
-    //->onOneServer()
+    ->onOneServer()
     ->runInBackground();
