@@ -85,6 +85,10 @@ class GetEnrollmentsCommand extends Command
                         ? Carbon::createFromFormat('d/m/Y', $res['DataMatricula'])->format('Y-m-d')
                         : null;
 
+                    $endDateFormat = !empty($res['DataEncerramento']) && is_string($res['DataEncerramento'])
+                        ? Carbon::createFromFormat('d/m/Y', $res['DataEncerramento'])->format('Y-m-d')
+                        : null;
+
                     $contratoId = !empty($res['ContratoID']) ? (int) $res['ContratoID'] : null;
                     if (!$contratoId) {
                         $this->warn("⚠️ Matrícula sem ContratoID válido, ignorada.");
@@ -108,6 +112,7 @@ class GetEnrollmentsCommand extends Command
                             'start_date' => $startDateFormat ?? null,
                             'deadline_date' => $deadlineDateFormat ?? null,
                             'enrollment_date' => $enrollmentDate ?? null,
+                            'end_date' => $endDateFormat ?? null,
                             'contractor' => is_array($res['Contratante'] ?? null) ? null : ($res['Contratante'] ?? null),
                             'financial_released' => is_array($res['FinanceiroLancado'] ?? null) ? null : ($res['FinanceiroLancado'] ?? null),
                             'contract_number' => is_array($res['NumeroContrato'] ?? null) ? null : ($res['NumeroContrato'] ?? null),
@@ -140,6 +145,10 @@ class GetEnrollmentsCommand extends Command
                 ? Carbon::createFromFormat('d/m/Y', $matricula['DataMatricula'])->format('Y-m-d')
                 : null;
 
+            $endDateFormat = !empty($matricula['DataEncerramento']) && is_string($matricula['DataEncerramento'])
+                ? Carbon::createFromFormat('d/m/Y', $matricula['DataEncerramento'])->format('Y-m-d')
+                : null;
+
             $contratoIdTwo = !empty($matricula['ContratoID']) ? (int) $matricula['ContratoID'] : null;
             if (!$contratoIdTwo) {
                 $this->warn("⚠️ Matrícula sem ContratoID válido, ignorada.");
@@ -163,9 +172,12 @@ class GetEnrollmentsCommand extends Command
                     'start_date' => $startDateFormat ?? null,
                     'deadline_date' => $deadlineDateFormat ?? null,
                     'enrollment_date' => $enrollmentDate ?? null,
+                    'end_date' => $endDateFormat ?? null,
                     'contractor' => is_array($matricula['Contratante'] ?? null) ? null : ($matricula['Contratante'] ?? null),
                     'financial_released' => is_array($matricula['FinanceiroLancado'] ?? null) ? null : ($matricula['FinanceiroLancado'] ?? null),
                     'contract_number' => is_array($matricula['NumeroContrato'] ?? null) ? null : ($matricula['NumeroContrato'] ?? null),
+                    'type_of_contract' => is_array($matricula['TipoContratoID'] ?? null) ? null : ($matricula['TipoContratoID'] ?? null),
+                    'type' => is_array($matricula['Tipo'] ?? null) ? null : ($matricula['Tipo'] ?? null),
                 ]
             );
 
