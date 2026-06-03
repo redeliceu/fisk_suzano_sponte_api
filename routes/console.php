@@ -15,6 +15,7 @@ Schedule::command('enrollments')
     // ->everyThreeHours()
     ->everyThirtyMinutes()
     // ->hourly()
+    ->withoutOverlapping(1440) // 24h de proteção
     ->onOneServer()
     ->runInBackground();
 
@@ -24,6 +25,7 @@ Schedule::command('installment')
     ->everyTwoHours()
     // ->everyThreeHours()
     //  ->hourly()
+    ->withoutOverlapping(1440) // 24h de proteção
     ->onOneServer()
     ->runInBackground();
 
@@ -33,6 +35,7 @@ Schedule::command('financial')
     // ->everyMinute()
     //->everyThreeHours()
     ->hourly()
+    ->withoutOverlapping(1440) // 24h de proteção
     ->onOneServer()
     ->runInBackground();
 
@@ -41,5 +44,6 @@ Schedule::command('student')
     // ->everyMinute()
     ->everyThreeHours()
     // ->hourly()
+    ->withoutOverlapping(1440) // 24h de proteção
     ->onOneServer()
     ->runInBackground();
