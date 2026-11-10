@@ -34,8 +34,10 @@ class ApiTokenMiddleware
             $token = null;
         }
 
-        // Compara com o token do .env
-        if ($token !== env('API_ACCESS_TOKEN')) {
+        // Compara com o token do .env. Token vazio/ausente no .env NUNCA libera acesso
+        // (antes: sem API_ACCESS_TOKEN definido, null === null deixava passar sem token).
+        $expected = (string) env('API_ACCESS_TOKEN', '');
+        if ($expected === '' || $token === null || ! hash_equals($expected, (string) $token)) {
             return response()->json(['error' => 'Acesso não autorizado'], 401);
         }
 
