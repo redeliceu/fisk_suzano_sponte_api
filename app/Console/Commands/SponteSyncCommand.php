@@ -19,13 +19,20 @@ abstract class SponteSyncCommand extends Command
 
     protected SyncSummary $summary;
 
+    /**
+     * true: sem --all, processa só alunos ativos (SPONTE_ACTIVE_STATUSES).
+     * O student usa false: os dados já vêm no GetAlunos, sem chamada por aluno.
+     */
+    protected bool $activeOnlyByDefault = true;
+
     /** Sincroniza um aluno. Exceções lançadas aqui contam como falha só desse aluno. */
     abstract protected function syncStudent(array $aluno, int $studentId): void;
 
     public function handle(SponteService $sponte): int
     {
         $this->sponte = $sponte;
-        $this->summary = new SyncSummary($this->getName());
+        $full = ! $this->activeOnlyByDefault || ($this->hasOption('all') && $this->option('all'));
+        $this->summary = new SyncSummary($this->getName(), $full ? 'completo' : 'ativos');
 
         try {
             $alunos = $sponte->getAlunos();
@@ -40,6 +47,12 @@ abstract class SponteSyncCommand extends Command
 
             if ($studentId === null) {
                 $this->summary->skip();
+
+                continue;
+            }
+
+            if (! $full && ! SponteData::isActive($aluno['Situacao'] ?? null)) {
+                $this->summary->outOfScope++;
 
                 continue;
             }

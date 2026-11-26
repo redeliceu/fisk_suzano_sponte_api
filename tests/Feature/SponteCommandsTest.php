@@ -21,7 +21,8 @@ beforeEach(function () {
 
 function alunosXml(array $alunos): string
 {
-    $items = collect($alunos)->map(fn ($fields) => '<wsAluno>'.collect($fields)
+    // Sem Situacao informada, o aluno é Ativo (entra no ciclo frequente).
+    $items = collect($alunos)->map(fn ($fields) => '<wsAluno>'.collect($fields + ['Situacao' => 'Ativo'])
         ->map(fn ($v, $k) => "<$k>$v</$k>")->implode('').'</wsAluno>')->implode('');
 
     return '<?xml version="1.0" encoding="utf-8"?><ArrayOfWsAluno xmlns="http://api.sponteeducacional.net.br/">'.$items.'</ArrayOfWsAluno>';
@@ -34,6 +35,46 @@ function parcelasXml(int $conta, array $numeros): string
 
     return '<?xml version="1.0" encoding="utf-8"?><ArrayOfWsParcela xmlns="http://api.sponteeducacional.net.br/">'.$items.'</ArrayOfWsParcela>';
 }
+
+it('por padrão consulta só alunos ativos; com --all consulta todos', function () {
+    Http::fake([
+        '*/GetAlunos*' => Http::response(alunosXml([
+            ['AlunoID' => 1, 'Situacao' => 'Ativo'],
+            ['AlunoID' => 2, 'Situacao' => 'Inativo'],
+            ['AlunoID' => 3, 'Situacao' => 'ATIVO'],
+        ])),
+        '*/GetParcelas*' => fn (Request $r) => Http::response(parcelasXml((int) substr($r->url(), -1) * 10, [1])),
+    ]);
+
+    $this->artisan('installment')
+        ->expectsOutputToContain('modo=ativos alunos=2 fora_do_filtro=1')
+        ->assertSuccessful();
+
+    Http::assertNotSent(fn (Request $r) => str_contains($r->url(), 'AlunoID%3D2'));
+    expect(Installment::count())->toBe(2);
+
+    $this->artisan('installment --all')
+        ->expectsOutputToContain('modo=completo alunos=3 fora_do_filtro=0')
+        ->assertSuccessful();
+
+    expect(Installment::count())->toBe(3);
+});
+
+it('aceita outras situações como ativas via config', function () {
+    config(['services.sponte.active_statuses' => ['Ativo', 'Trancado']]);
+
+    Http::fake([
+        '*/GetAlunos*' => Http::response(alunosXml([
+            ['AlunoID' => 1, 'Situacao' => 'Trancado'],
+            ['AlunoID' => 2, 'Situacao' => 'Inativo'],
+        ])),
+        '*/GetMatriculas*' => Http::response('<?xml version="1.0"?><ArrayOfWsMatricula xmlns="http://api.sponteeducacional.net.br/"></ArrayOfWsMatricula>'),
+    ]);
+
+    $this->artisan('enrollments')
+        ->expectsOutputToContain('alunos=1 fora_do_filtro=1')
+        ->assertSuccessful();
+});
 
 it('installment chama GetParcelas uma vez por aluno e não chama GetFinanceiro2', function () {
     Http::fake([

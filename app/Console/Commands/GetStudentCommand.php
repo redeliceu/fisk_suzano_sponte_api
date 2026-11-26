@@ -11,6 +11,8 @@ class GetStudentCommand extends SponteSyncCommand
 
     protected $description = 'Sincroniza o cadastro (GetAlunos) de todos os alunos da Sponte';
 
+    protected bool $activeOnlyByDefault = false;
+
     /** Não chama a Sponte por aluno: os dados já vêm no GetAlunos. */
     protected function syncStudent(array $aluno, int $studentId): void
     {

@@ -47,6 +47,23 @@ class SponteData
         return $value !== null && is_numeric($value) ? (int) $value : null;
     }
 
+    /** Situação do aluno está na lista de ativos (SPONTE_ACTIVE_STATUSES, sem diferenciar maiúsculas). */
+    public static function isActive(mixed $situacao): bool
+    {
+        $situacao = self::str($situacao);
+
+        if ($situacao === null) {
+            return false;
+        }
+
+        $active = array_map(
+            fn ($s) => mb_strtolower(trim($s)),
+            (array) config('services.sponte.active_statuses', ['Ativo'])
+        );
+
+        return in_array(mb_strtolower($situacao), $active, true);
+    }
+
     /** Data d/m/Y da Sponte convertida para Y-m-d, ou null se vazia/inválida. */
     public static function date(mixed $value): ?string
     {

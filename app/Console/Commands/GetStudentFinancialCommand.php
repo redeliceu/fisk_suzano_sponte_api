@@ -7,9 +7,9 @@ use App\Support\SponteData;
 
 class GetStudentFinancialCommand extends SponteSyncCommand
 {
-    protected $signature = 'financial';
+    protected $signature = 'financial {--all : Todos os alunos (varredura completa), não só os ativos}';
 
-    protected $description = 'Sincroniza as contas a receber (GetFinanceiro2) de todos os alunos da Sponte';
+    protected $description = 'Sincroniza as contas a receber (GetFinanceiro2) dos alunos ativos da Sponte (todos com --all)';
 
     protected function syncStudent(array $aluno, int $studentId): void
     {

@@ -27,9 +27,12 @@ class SyncSummary
 
     public int $failed = 0;
 
+    /** Alunos fora do filtro de ativos (não consultados nesta execução). */
+    public int $outOfScope = 0;
+
     protected float $startedAt;
 
-    public function __construct(protected string $command)
+    public function __construct(protected string $command, protected string $mode = 'completo')
     {
         $this->startedAt = microtime(true);
     }
@@ -63,7 +66,9 @@ class SyncSummary
     public function toArray(): array
     {
         return [
+            'modo' => $this->mode,
             'alunos' => $this->students,
+            'fora_do_filtro' => $this->outOfScope,
             'criados' => $this->created,
             'alterados' => $this->updated,
             'sem_mudanca' => $this->unchanged,
