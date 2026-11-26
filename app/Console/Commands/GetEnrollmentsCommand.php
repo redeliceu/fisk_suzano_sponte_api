@@ -7,9 +7,9 @@ use App\Support\SponteData;
 
 class GetEnrollmentsCommand extends SponteSyncCommand
 {
-    protected $signature = 'enrollments';
+    protected $signature = 'enrollments {--all : Todos os alunos (varredura completa), não só os ativos}';
 
-    protected $description = 'Sincroniza as matrículas (GetMatriculas) de todos os alunos da Sponte';
+    protected $description = 'Sincroniza as matrículas (GetMatriculas) dos alunos ativos da Sponte (todos com --all)';
 
     protected function syncStudent(array $aluno, int $studentId): void
     {

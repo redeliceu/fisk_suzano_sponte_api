@@ -7,9 +7,9 @@ use App\Support\SponteData;
 
 class GetInstallmentCommand extends SponteSyncCommand
 {
-    protected $signature = 'installment';
+    protected $signature = 'installment {--all : Todos os alunos (varredura completa), não só os ativos}';
 
-    protected $description = 'Sincroniza as parcelas (GetParcelas) de todos os alunos da Sponte';
+    protected $description = 'Sincroniza as parcelas (GetParcelas) dos alunos ativos da Sponte (todos com --all)';
 
     /** Uma chamada GetParcelas por aluno; ela já traz as parcelas de todas as contas a receber. */
     protected function syncStudent(array $aluno, int $studentId): void

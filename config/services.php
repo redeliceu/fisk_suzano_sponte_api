@@ -30,11 +30,25 @@ return [
             'retry_delay_ms' => (int) env('SPONTE_HTTP_RETRY_DELAY_MS', 1000),
         ],
 
+        // Situações consideradas "ativas" no ciclo frequente (campo Situacao do GetAlunos).
+        'active_statuses' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env('SPONTE_ACTIVE_STATUSES', 'Ativo'))
+        ))),
+
         // Agendamento (routes/console.php). Cada unidade usa um OFFSET (minuto 0-59) diferente
         // para as 5 instalações do droplet não chamarem a Sponte ao mesmo tempo.
         'schedule' => [
             'offset' => (int) env('SPONTE_SCHEDULE_OFFSET', 0),
             'lock_minutes' => (int) env('SPONTE_SCHEDULE_LOCK_MINUTES', 360),
+
+            // Varredura completa (--all) de enrollments, financial e installment, uma vez por semana,
+            // no dia FULL_SCAN_DAY (0 = domingo ... 6 = sábado), na START_HOUR de cada command.
+            'full_scan' => [
+                'enabled' => (bool) env('SPONTE_FULL_SCAN_ENABLED', true),
+                'day' => (int) env('SPONTE_FULL_SCAN_DAY', 0),
+                'lock_minutes' => (int) env('SPONTE_FULL_SCAN_LOCK_MINUTES', 1440),
+            ],
             'commands' => [
                 'student' => [
                     'every_hours' => (int) env('SPONTE_STUDENT_EVERY_HOURS', 6),
