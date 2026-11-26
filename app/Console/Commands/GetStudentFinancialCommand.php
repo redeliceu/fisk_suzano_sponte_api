@@ -3,89 +3,44 @@
 namespace App\Console\Commands;
 
 use App\Models\Financial;
-use App\Services\SponteService;
-use Illuminate\Console\Command;
-use Carbon\Carbon;
+use App\Support\SponteData;
 
-class GetStudentFinancialCommand extends Command
+class GetStudentFinancialCommand extends SponteSyncCommand
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'financial';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Command description';
+    protected $description = 'Sincroniza as contas a receber (GetFinanceiro2) de todos os alunos da Sponte';
 
-    /**
-     * Execute the console command.
-     */
-    public function handle()
+    protected function syncStudent(array $aluno, int $studentId): void
     {
-        $sponteService = new SponteService;
+        foreach ($this->sponte->getFinanceiro($studentId) as $conta) {
+            $accountReceiveId = SponteData::id($conta['ContaReceberID'] ?? null);
 
-        $alunos = $sponteService->getAlunos();
-
-        foreach ($alunos as $aluno) {
-
-            //print_r($aluno);
-
-            $financeiro = $sponteService->getFinanceiro($aluno['AlunoID']);
-
-            $account_receive_id = !empty($financeiro['ContaReceberID']) ? (int) $financeiro['ContaReceberID'] : null;
-
-            if (!$account_receive_id) {
-                foreach ($financeiro as $res) {
-                    if (!is_array($res)) {
-                        $this->warn("⚠️ Array NULL.");
-                        continue;
-                    }
-
-                    $financeiroArrayCriado = createOrUpdateFinancial($res);
-
-                    $this->warn("✅Dado Financeiro Criado com sucesso! Aluno $financeiroArrayCriado tem mais de uma conta financeira.");
-
-                }
+            if ($accountReceiveId === null) {
+                $this->summary->skip();
 
                 continue;
             }
 
-            $financeiroCriado = createOrUpdateFinancial($financeiro);
+            $infoAluno = $conta['Aluno']['wsInfoAluno'] ?? [];
 
-            $this->info("✅ Dado Financeiro Criado com sucesso! Aluno " . ($financeiroCriado ?? 'Desconhecido'));
+            $financial = Financial::updateOrCreate(
+                ['account_receive_id' => $accountReceiveId],
+                [
+                    'unit_code' => SponteData::id($conta['CodigoUnidade'] ?? null),
+                    'student_id' => SponteData::id($infoAluno['AlunoID'] ?? null) ?? $studentId,
+                    'student_name' => SponteData::str($infoAluno['Nome'] ?? null),
+                    'number_of_parcels' => SponteData::str($conta['NumeroParcelas'] ?? null),
+                    'contract_number' => SponteData::str($conta['NumeroContrato'] ?? null),
+                    'total_gross_value' => SponteData::str($conta['TotalValorBruto'] ?? null),
+                    'total_net_value' => SponteData::str($conta['TotalValorLiquido'] ?? null),
+                    'total_discount_reais' => SponteData::str($conta['TotalDescontoReais'] ?? null),
+                    'total_discount_percentage' => SponteData::str($conta['TotalDescontoPercentual'] ?? null),
+                    'category' => SponteData::str($conta['Categoria'] ?? null),
+                ]
+            );
 
+            $this->summary->saved($financial);
         }
     }
 }
-
-function createOrUpdateFinancial($data)
-{
-
-    $financialCreated = Financial::updateOrCreate(
-        [
-            'account_receive_id' => (int) $data['ContaReceberID']
-        ],
-        [
-            'unit_code' => (int) $data['CodigoUnidade'] ?? null,
-            'student_id' => (int) $data['Aluno']['wsInfoAluno']['AlunoID'] ?? null,
-            'student_name' => $data['Aluno']['wsInfoAluno']['Nome'] ?? null,
-            'number_of_parcels' => is_array($data['NumeroParcelas'] ?? null) ? null : ($data['NumeroParcelas'] ?? null),
-            'contract_number' => is_array($data['NumeroContrato'] ?? null) ? null : ($data['NumeroContrato'] ?? null),
-            'total_gross_value' => is_array($data['TotalValorBruto'] ?? null) ? null : ($data['TotalValorBruto'] ?? null),
-            'total_net_value' => is_array($data['TotalValorLiquido'] ?? null) ? null : ($data['TotalValorLiquido'] ?? null),
-            'total_discount_reais' => is_array($data['TotalDescontoReais'] ?? null) ? null : ($data['TotalDescontoReais'] ?? null),
-            'total_discount_percentage' => is_array($data['TotalDescontoPercentual'] ?? null) ? null : ($data['TotalDescontoPercentual'] ?? null),
-            'category' => is_array($data['Categoria'] ?? null) ? null : ($data['Categoria'] ?? null),
-        ]
-    );
-
-    return $financialCreated['student_name'];
-}
-
-

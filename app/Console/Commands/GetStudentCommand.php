@@ -3,80 +3,56 @@
 namespace App\Console\Commands;
 
 use App\Models\Student;
-use App\Services\SponteService;
-use Carbon\Carbon;
-use Illuminate\Console\Command;
+use App\Support\SponteData as D;
 
-class GetStudentCommand extends Command
+class GetStudentCommand extends SponteSyncCommand
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'student';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'getting all students';
+    protected $description = 'Sincroniza o cadastro (GetAlunos) de todos os alunos da Sponte';
 
-    /**
-     * Execute the console command.
-     */
-    public function handle()
+    /** Não chama a Sponte por aluno: os dados já vêm no GetAlunos. */
+    protected function syncStudent(array $aluno, int $studentId): void
     {
-        $sponteService = new SponteService;
+        $student = Student::updateOrCreate(
+            ['student_id' => $studentId],
+            [
+                // A Sponte usa 0/-1 para "sem responsável"; a coluna é unsigned.
+                'responsible_financial_id' => D::id($aluno['ResponsavelFinanceiroID'] ?? null),
+                'responsible_didactic_id' => D::id($aluno['ResponsavelDidaticoID'] ?? null),
 
+                'name' => D::str($aluno['Nome'] ?? null),
+                'cpf' => D::str($aluno['CPF'] ?? null),
+                'rg' => D::str($aluno['RG'] ?? null),
+                'midia' => D::str($aluno['Midia'] ?? null),
+                'date_of_birth' => D::date($aluno['DataNascimento'] ?? null),
 
-        $alunos = $sponteService->getAlunos();
+                'email' => D::str($aluno['Email'] ?? null),
+                'date_of_register' => D::date($aluno['DataCadastro'] ?? null),
+                'ra' => D::str($aluno['RA'] ?? null),
+                'portal_login' => D::str($aluno['LoginPortal'] ?? null),
+                'portal_password' => D::str($aluno['SenhaPortal'] ?? null),
+                'obs' => D::str($aluno['obs'] ?? null),
+                'phone' => D::str($aluno['Telefone'] ?? null),
+                'mobile_phone' => D::str($aluno['Celular'] ?? null),
+                'current_class' => D::str($aluno['TurmaAtual'] ?? null),
+                'enrollments_number' => D::str($aluno['NumeroMatricula'] ?? null),
+                'gender' => D::str($aluno['Sexo'] ?? null),
+                'status' => D::str($aluno['Situacao'] ?? null),
 
-        foreach ($alunos as $aluno) {
+                'postal_code' => D::str($aluno['CEP'] ?? null),
+                'address' => D::str($aluno['Endereco'] ?? null),
+                'address_number' => D::str($aluno['NumeroEndereco'] ?? null),
+                'city' => D::str($aluno['Cidade'] ?? null),
+                'neighborhood' => D::str($aluno['Bairro'] ?? null),
+                'hometown' => D::str($aluno['CidadeNatal'] ?? null),
+                'defaulter' => D::str($aluno['Inadimplente'] ?? null),
+                'origin' => D::str($aluno['Origem'] ?? null),
+                'origin_name' => D::str($aluno['NomeOrigem'] ?? null),
+                'course_interest' => D::str($aluno['CursoInteresse'] ?? null),
+            ]
+        );
 
-           // dd($aluno);
-
-            $financialCreated = Student::updateOrCreate(
-                [
-                    'student_id' => (int) $aluno['AlunoID']
-                ],
-                [
-                    'responsible_financial_id' => (int) $aluno['ResponsavelFinanceiroID'] ?? null,
-                    'responsible_didactic_id' => (int) $aluno['ResponsavelDidaticoID'] ?? null,
-
-                    'name' => is_array($aluno['Nome'] ?? null) ? null : ($aluno['Nome'] ?? null),
-                    'cpf' => is_array($aluno['CPF'] ?? null) ? null : ($aluno['CPF'] ?? null),
-                    'rg' => is_array($aluno['RG'] ?? null) ? null : ($aluno['RG'] ?? null),
-                    'midia' => is_array($aluno['Midia'] ?? null) ? null : ($aluno['Midia'] ?? null),
-                    'date_of_birth' => !empty($aluno['DataNascimento']) && is_string($aluno['DataNascimento']) ? Carbon::createFromFormat('d/m/Y', $aluno['DataNascimento'])->format('Y-m-d') : null,
-
-                    'email' => is_array($aluno['Email'] ?? null) ? null : ($aluno['Email'] ?? null),
-                    'date_of_register' => !empty($aluno['DataCadastro']) && is_string($aluno['DataCadastro']) ? Carbon::createFromFormat('d/m/Y', $aluno['DataCadastro'])->format('Y-m-d') : null,
-                    'ra' => is_array($aluno['RA'] ?? null) ? null : ($aluno['RA'] ?? null),
-                    'portal_login' => is_array($aluno['LoginPortal'] ?? null) ? null : ($aluno['LoginPortal'] ?? null),
-                    'portal_password' => is_array($aluno['SenhaPortal'] ?? null) ? null : ($aluno['SenhaPortal'] ?? null),
-                    'obs' => is_array($aluno['obs'] ?? null) ? null : ($aluno['obs'] ?? null),
-                    'phone' => is_array($aluno['Telefone'] ?? null) ? null : ($aluno['Telefone'] ?? null),
-                    'mobile_phone' => is_array($aluno['Celular'] ?? null) ? null : ($aluno['Celular'] ?? null),
-                    'current_class' => is_array($aluno['TurmaAtual'] ?? null) ? null : ($aluno['TurmaAtual'] ?? null),
-                    'enrollments_number' => is_array($aluno['NumeroMatricula'] ?? null) ? null : ($aluno['NumeroMatricula'] ?? null),
-                    'gender' => is_array($aluno['Sexo'] ?? null) ? null : ($aluno['Sexo'] ?? null),
-                    'status' => is_array($aluno['Situacao'] ?? null) ? null : ($aluno['Situacao'] ?? null),
-
-                    'postal_code' => is_array($aluno['CEP'] ?? null) ? null : ($aluno['CEP'] ?? null),
-                    'address' => is_array($aluno['Endereco'] ?? null) ? null : ($aluno['Endereco'] ?? null),
-                    'address_number' => is_array($aluno['NumeroEndereco'] ?? null) ? null : ($aluno['NumeroEndereco'] ?? null),
-                    'city' => is_array($aluno['Cidade'] ?? null) ? null : ($aluno['Cidade'] ?? null),
-                    'neighborhood' => is_array($aluno['Bairro'] ?? null) ? null : ($aluno['Bairro'] ?? null),
-                    'hometown' => is_array($aluno['CidadeNatal'] ?? null) ? null : ($aluno['CidadeNatal'] ?? null),
-                    'defaulter' => is_array($aluno['Inadimplente'] ?? null) ? null : ($aluno['Inadimplente'] ?? null),
-                    'origin' => is_array($aluno['Origem'] ?? null) ? null : ($aluno['Origem'] ?? null),
-                    'origin_name' => is_array($aluno['NomeOrigem'] ?? null) ? null : ($aluno['NomeOrigem'] ?? null),
-                    'course_interest' => is_array($aluno['CursoInteresse'] ?? null) ? null : ($aluno['CursoInteresse'] ?? null),
-                ]
-            );
-
-            $this->info("✅ Aluno Criado com sucesso! Aluno: " . ($financialCreated->name ?? 'Desconhecido'));}
+        $this->summary->saved($student);
     }
 }
