@@ -73,6 +73,16 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // Resumos e falhas dos commands da Sponte. Nível próprio, independente de LOG_LEVEL,
+        // para o resumo de cada execução continuar visível com LOG_LEVEL=warning.
+        'sponte' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/sponte.log'),
+            'level' => env('SPONTE_LOG_LEVEL', 'info'),
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),
